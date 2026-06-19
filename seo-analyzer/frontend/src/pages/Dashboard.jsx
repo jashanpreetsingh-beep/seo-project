@@ -4,7 +4,7 @@
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, Loader2, Globe, Shield, FileText, Code, Gauge, Lock } from 'lucide-react'
+import { Search, Loader2, Globe, Shield, FileText, Code, Gauge, Lock, Brain } from 'lucide-react'
 import { runAudit } from '../api'
 
 export default function Dashboard() {
@@ -40,6 +40,7 @@ export default function Dashboard() {
     { icon: Gauge, title: 'Core Web Vitals', desc: 'LCP, INP, CLS via PageSpeed Insights' },
     { icon: Search, title: 'On-Page SEO', desc: 'Title, meta description, headings, links' },
     { icon: Lock, title: 'Security', desc: 'HTTPS, security headers, mixed content' },
+    { icon: Brain, title: 'GEO (AI Visibility)', desc: 'AI citation score, entity clarity, answer extraction' },
   ]
 
   return (
@@ -47,11 +48,11 @@ export default function Dashboard() {
       {/* Hero */}
       <div className="text-center mb-10">
         <h1 className="text-4xl font-bold text-navy mb-3">
-          SEO Analyzer
+          SEO + GEO Analyzer
         </h1>
         <p className="text-lg text-gray-600">
-          Comprehensive SEO analysis powered by LangGraph. Enter a URL to get a full audit
-          with actionable recommendations.
+          Comprehensive SEO & Generative Engine Optimization analysis powered by AI agents.
+          Enter a URL to get full SEO audit + AI visibility score with actionable improvements.
         </p>
       </div>
 
@@ -94,7 +95,7 @@ export default function Dashboard() {
 
         {loading && (
           <div className="mt-4 text-center text-gray-500">
-            <p className="text-sm">Running 6 analyzers in parallel... This takes 10-30 seconds.</p>
+            <p className="text-sm">Running 6 SEO analyzers + 5 GEO agents... This takes 15-45 seconds.</p>
           </div>
         )}
       </form>

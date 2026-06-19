@@ -60,7 +60,8 @@ export default function History() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">URL</th>
-                <th className="text-center px-4 py-3 text-xs font-medium text-gray-500 uppercase">Score</th>
+                <th className="text-center px-4 py-3 text-xs font-medium text-gray-500 uppercase">SEO</th>
+                <th className="text-center px-4 py-3 text-xs font-medium text-gray-500 uppercase">GEO</th>
                 <th className="text-center px-4 py-3 text-xs font-medium text-gray-500 uppercase">Type</th>
                 <th className="text-center px-4 py-3 text-xs font-medium text-gray-500 uppercase">Issues</th>
                 <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 uppercase">Date</th>
@@ -81,6 +82,11 @@ export default function History() {
                   <td className="px-4 py-3 text-center">
                     <span className={`px-2 py-1 text-xs font-bold rounded ${getScoreBadge(audit.health_score)}`}>
                       {Math.round(audit.health_score)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <span className={`px-2 py-1 text-xs font-bold rounded ${getScoreBadge(audit.geo_score || 0)}`}>
+                      {Math.round(audit.geo_score || 0)}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-center">

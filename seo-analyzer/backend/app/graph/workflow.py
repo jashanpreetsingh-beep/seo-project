@@ -1,15 +1,39 @@
 """
 LangGraph Workflow Definition.
 
-This is where the magic happens — we define the SEO analysis as a DIRECTED GRAPH:
+The system uses a DIRECTED GRAPH with two major analysis branches:
 
-    fetch_page → [technical, content, onpage, schema, performance, security] → scorer
+    fetch_page → [SEO Analyzers] → scorer → LLM recommendations
+                                          ↘
+               → [GEO Agents] → GEO scorer → GEO improvement → GEO report
 
-The middle nodes run IN PARALLEL (LangGraph handles this automatically).
-The scorer node waits for all analyzers to complete before computing the final score.
-
-This is the same pattern claude-seo uses with its 15 parallel subagents,
-but implemented as a proper workflow graph instead of AI agent delegation.
+Architecture:
+    WEBSITE URL
+         │
+         ▼
+    MASTER ORCHESTRATOR (fetch_page)
+         │
+    ─────┴─────────────────────────────────
+    │           │           │              │
+    ▼           ▼           ▼              ▼
+  CRAWLER    CONTEXT     SEO AGENT     GEO AGENT
+  (fetch)    (content)   (technical    (AI Search
+              (schema)    onpage        Visibility)
+              (security)  performance)
+    │           │           │              │
+    └───────────┴───────────┴──────────────┘
+                     │
+                     ▼
+           INTELLIGENCE LAYER (scorer + geo_scorer)
+                     │
+                     ▼
+        GEO SCORING + IMPROVEMENT AGENT
+                     │
+                     ▼
+            ACTION PLAN AGENT (geo_report)
+                     │
+                     ▼
+             FINAL GEO REPORT
 """
 
 from langgraph.graph import StateGraph, END
@@ -26,11 +50,21 @@ from app.graph.nodes import (
     scorer_node,
 )
 from app.graph.nodes.llm_recommendations import llm_recommendations_node
+from app.graph.nodes.geo import (
+    entity_understanding_node,
+    answer_extraction_node,
+    authority_trust_node,
+    citation_probability_node,
+    conversational_search_node,
+    geo_scorer_node,
+    geo_improvement_node,
+    geo_report_node,
+)
 
 
 def create_seo_graph() -> StateGraph:
     """
-    Build the SEO analysis graph.
+    Build the combined SEO + GEO analysis graph.
     
     Graph structure:
     
@@ -39,15 +73,32 @@ def create_seo_graph() -> StateGraph:
           ▼
         fetch_page  (fetches URL, gets HTML + headers)
           │
-          ├─── should_continue? ───(if fetch failed)──→ END
+          ├─── should_continue? ───(if fetch failed)──→ scorer → END
           │
-          ▼ (fan-out: all run in parallel)
-        ┌─────────────────────────────────────────────┐
-        │ technical  content  onpage  schema  perf  sec │
-        └─────────────────────────────────────────────┘
-          │ (fan-in: waits for all to complete)
+          ▼ (sequential analysis chain)
+        ┌─────────────────────────────────────────────────────────────┐
+        │ SEO: technical → content → onpage → schema → perf → security │
+        └─────────────────────────────────────────────────────────────┘
+          │
           ▼
-        scorer  (aggregates scores, generates report)
+        scorer (SEO health score)
+          │
+          ▼
+        ┌─────────────────────────────────────────────────────────────────┐
+        │ GEO: entity → answer → authority → citation → conversational    │
+        └─────────────────────────────────────────────────────────────────┘
+          │
+          ▼
+        geo_scorer (weighted GEO score)
+          │
+          ▼
+        geo_improvement (prioritized actions)
+          │
+          ▼
+        geo_report (final GEO strategy)
+          │
+          ▼
+        llm_recommendations (Claude AI enhancement)
           │
           ▼
         END
@@ -55,7 +106,7 @@ def create_seo_graph() -> StateGraph:
     # Create the graph with our state type
     graph = StateGraph(SEOState)
 
-    # ─── Add nodes ────────────────────────────────────────────────────────────
+    # ─── Add SEO nodes ────────────────────────────────────────────────────────
     graph.add_node("fetch_page", fetch_page_node)
     graph.add_node("technical_analyzer", technical_analyzer_node)
     graph.add_node("content_analyzer", content_analyzer_node)
@@ -64,6 +115,18 @@ def create_seo_graph() -> StateGraph:
     graph.add_node("performance_analyzer", performance_analyzer_node)
     graph.add_node("security_analyzer", security_analyzer_node)
     graph.add_node("scorer", scorer_node)
+
+    # ─── Add GEO nodes ────────────────────────────────────────────────────────
+    graph.add_node("geo_entity", entity_understanding_node)
+    graph.add_node("geo_answer", answer_extraction_node)
+    graph.add_node("geo_authority", authority_trust_node)
+    graph.add_node("geo_citation", citation_probability_node)
+    graph.add_node("geo_conversational", conversational_search_node)
+    graph.add_node("geo_scorer", geo_scorer_node)
+    graph.add_node("geo_improvement", geo_improvement_node)
+    graph.add_node("geo_report", geo_report_node)
+
+    # ─── Add LLM enhancement node ────────────────────────────────────────────
     graph.add_node("llm_recommendations", llm_recommendations_node)
 
     # ─── Define edges (the flow) ──────────────────────────────────────────────
@@ -82,14 +145,12 @@ def create_seo_graph() -> StateGraph:
         "fetch_page",
         should_continue,
         {
-            "analyze": "technical_analyzer",  # This triggers the analysis chain
+            "analyze": "technical_analyzer",
             "scorer": "scorer",
         },
     )
 
-    # Analysis chain — each node writes to a different state key, no conflicts.
-    # They run sequentially here; for true parallelism you'd use
-    # LangGraph's Send() API or asyncio.gather() in a single node.
+    # SEO Analysis chain
     graph.add_edge("technical_analyzer", "content_analyzer")
     graph.add_edge("content_analyzer", "onpage_analyzer")
     graph.add_edge("onpage_analyzer", "schema_analyzer")
@@ -97,10 +158,22 @@ def create_seo_graph() -> StateGraph:
     graph.add_edge("performance_analyzer", "security_analyzer")
     graph.add_edge("security_analyzer", "scorer")
 
-    # scorer → LLM recommendations (Claude Sonnet 4) → END
-    # The LLM node enhances recommendations with AI intelligence.
-    # If no API key is set, it returns empty and rule-based recs are used.
-    graph.add_edge("scorer", "llm_recommendations")
+    # SEO scorer → GEO analysis chain
+    graph.add_edge("scorer", "geo_entity")
+
+    # GEO Analysis chain (5 agents in sequence)
+    graph.add_edge("geo_entity", "geo_answer")
+    graph.add_edge("geo_answer", "geo_authority")
+    graph.add_edge("geo_authority", "geo_citation")
+    graph.add_edge("geo_citation", "geo_conversational")
+
+    # GEO agents → GEO scoring pipeline
+    graph.add_edge("geo_conversational", "geo_scorer")
+    graph.add_edge("geo_scorer", "geo_improvement")
+    graph.add_edge("geo_improvement", "geo_report")
+
+    # GEO report → LLM enhancement → END
+    graph.add_edge("geo_report", "llm_recommendations")
     graph.add_edge("llm_recommendations", END)
 
     return graph
@@ -121,16 +194,17 @@ def _get_compiled_graph():
 
 async def run_audit(url: str) -> dict:
     """
-    Execute the full SEO audit workflow for a URL.
+    Execute the full SEO + GEO audit workflow for a URL.
     
     This is the main entry point called by the API route.
-    It initializes the state, runs the graph, and returns the final result.
+    It initializes the state, runs the graph, and returns the final result
+    containing both SEO analysis and GEO (AI visibility) analysis.
     
     Args:
         url: The URL to analyze
         
     Returns:
-        Complete audit results dictionary
+        Complete audit results dictionary with SEO + GEO data
     """
     compiled = _get_compiled_graph()
 
@@ -142,6 +216,7 @@ async def run_audit(url: str) -> dict:
         "headers": {},
         "redirect_chain": [],
         "fetch_error": None,
+        # SEO
         "technical_result": None,
         "content_result": None,
         "onpage_result": None,
@@ -152,6 +227,22 @@ async def run_audit(url: str) -> dict:
         "site_type": "other",
         "issues": [],
         "recommendations": [],
+        # GEO
+        "geo_entity_result": None,
+        "geo_answer_result": None,
+        "geo_authority_result": None,
+        "geo_citation_result": None,
+        "geo_conversational_result": None,
+        "geo_score": 0,
+        "geo_scores": None,
+        "geo_visibility": None,
+        "geo_strengths": None,
+        "geo_weaknesses": None,
+        "geo_all_issues": None,
+        "geo_priority_actions": None,
+        "geo_potential_score": 0,
+        "geo_total_potential_gain": 0,
+        "geo_report": None,
     }
 
     # Run the graph — this executes all nodes in order
@@ -164,6 +255,7 @@ async def run_audit(url: str) -> dict:
         "site_type": final_state.get("site_type", "other"),
         "status_code": final_state.get("status_code", 0),
         "fetch_error": final_state.get("fetch_error"),
+        # SEO results
         "technical": final_state.get("technical_result", {}),
         "content": final_state.get("content_result", {}),
         "onpage": final_state.get("onpage_result", {}),
@@ -172,4 +264,7 @@ async def run_audit(url: str) -> dict:
         "security": final_state.get("security_result", {}),
         "issues": final_state.get("issues", []),
         "recommendations": final_state.get("recommendations", []),
+        # GEO results
+        "geo": final_state.get("geo_report", {}),
+        "geo_score": final_state.get("geo_score", 0),
     }

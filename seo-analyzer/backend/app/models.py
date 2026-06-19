@@ -33,6 +33,9 @@ class AuditResult(Base):
     performance_score = Column(Float, nullable=True)
     security_score = Column(Float, nullable=True)
 
+    # GEO Score (0-100)
+    geo_score = Column(Float, nullable=True)
+
     # Detected site type
     site_type = Column(String(50), nullable=True)  # saas, ecommerce, local, publisher, agency
 
