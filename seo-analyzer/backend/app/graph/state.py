@@ -65,3 +65,6 @@ class SEOState(TypedDict):
     geo_potential_score: float              # Score after improvements
     geo_total_potential_gain: float         # Total possible gain
     geo_report: Optional[dict]             # Final compiled GEO report
+
+    # ─── Token Usage (populated by llm_recommendations node) ──────────────────
+    token_usage: Optional[dict]  # {input_tokens, output_tokens, total_tokens, model}

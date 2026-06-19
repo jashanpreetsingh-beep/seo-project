@@ -174,6 +174,15 @@ class GEOResult(BaseModel):
 
 # ─── Full Audit Response ──────────────────────────────────────────────────────
 
+class TokenUsage(BaseModel):
+    """LLM API token usage for the recommendations call."""
+    input_tokens: int = 0
+    output_tokens: int = 0
+    total_tokens: int = 0
+    model: str = ""
+    provider: str = ""  # "groq" or "anthropic"
+
+
 class AuditResponse(BaseModel):
     """Complete audit result returned to the frontend."""
     id: Optional[int] = None
@@ -206,6 +215,9 @@ class AuditResponse(BaseModel):
 
     # Recommendations (prioritized)
     recommendations: list[dict] = []
+
+    # Claude token usage
+    token_usage: Optional[TokenUsage] = None
 
 
 class AuditHistoryItem(BaseModel):
