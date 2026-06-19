@@ -44,3 +44,6 @@ class SEOState(TypedDict):
     site_type: str
     issues: List[dict]
     recommendations: List[dict]
+
+    # ─── Token Usage (populated by llm_recommendations node) ──────────────────
+    token_usage: Optional[dict]  # {input_tokens, output_tokens, total_tokens, model}

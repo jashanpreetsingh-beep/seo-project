@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import init_db
-from app.routes import audit_router, history_router
+from app.routes import audit_router, history_router, visibility_router
 
 
 @asynccontextmanager
@@ -49,6 +49,7 @@ app.add_middleware(
 # Register routes
 app.include_router(audit_router)
 app.include_router(history_router)
+app.include_router(visibility_router)
 
 
 @app.get("/")

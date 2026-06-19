@@ -92,6 +92,7 @@ async def create_audit(request: AuditRequest, db: AsyncSession = Depends(get_db)
         medium_count=medium_count,
         low_count=low_count,
         recommendations=results.get("recommendations", []),
+        token_usage=results.get("token_usage"),
     )
 
 
@@ -127,4 +128,5 @@ async def get_audit(audit_id: int, db: AsyncSession = Depends(get_db)):
         medium_count=audit.medium_count,
         low_count=audit.low_count,
         recommendations=stored.get("recommendations", []),
+        token_usage=stored.get("token_usage"),
     )

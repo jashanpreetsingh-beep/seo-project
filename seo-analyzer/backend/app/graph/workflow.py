@@ -152,6 +152,7 @@ async def run_audit(url: str) -> dict:
         "site_type": "other",
         "issues": [],
         "recommendations": [],
+        "token_usage": None,
     }
 
     # Run the graph — this executes all nodes in order
@@ -172,4 +173,5 @@ async def run_audit(url: str) -> dict:
         "security": final_state.get("security_result", {}),
         "issues": final_state.get("issues", []),
         "recommendations": final_state.get("recommendations", []),
+        "token_usage": final_state.get("token_usage"),
     }
