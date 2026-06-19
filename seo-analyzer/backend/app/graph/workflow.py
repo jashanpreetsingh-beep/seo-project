@@ -246,6 +246,8 @@ async def run_audit(url: str) -> dict:
         "geo_potential_score": 0,
         "geo_total_potential_gain": 0,
         "geo_report": None,
+        # Token usage
+        "token_usage": None,
     }
 
     # Run the graph — this executes all nodes in order
@@ -271,4 +273,6 @@ async def run_audit(url: str) -> dict:
         # GEO results
         "geo": final_state.get("geo_report", {}),
         "geo_score": final_state.get("geo_score", 0),
+        # Token usage
+        "token_usage": final_state.get("token_usage"),
     }
