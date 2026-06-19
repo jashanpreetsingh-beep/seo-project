@@ -1,11 +1,12 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Search, History, BarChart3 } from 'lucide-react'
+import { Search, History, BarChart3, Eye } from 'lucide-react'
 
 export default function Layout({ children }) {
   const location = useLocation()
 
   const navItems = [
     { path: '/', label: 'Analyzer', icon: Search },
+    { path: '/visibility', label: 'AI Visibility', icon: Eye },
     { path: '/history', label: 'History', icon: History },
   ]
 

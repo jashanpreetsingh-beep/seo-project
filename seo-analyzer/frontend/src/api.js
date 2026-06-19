@@ -56,4 +56,14 @@ export async function getUrlHistory(url) {
   return response.data
 }
 
+/**
+ * Run an AI visibility check.
+ * @param {object} params - { query, target_url, provider, num_results }
+ * @returns {Promise<object>} Visibility check results
+ */
+export async function checkVisibility({ query, target_url, provider, num_results }) {
+  const response = await api.post('/visibility', { query, target_url, provider, num_results })
+  return response.data
+}
+
 export default api

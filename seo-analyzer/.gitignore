@@ -7,10 +7,8 @@ build/
 venv/
 .venv/
 *.db
-
-# Environment
 .env
-.env.local
+.env.example
 
 # Node
 node_modules/

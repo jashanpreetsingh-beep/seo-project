@@ -3,6 +3,7 @@ import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import AuditResults from './pages/AuditResults'
 import History from './pages/History'
+import Visibility from './pages/Visibility'
 
 export default function App() {
   return (
@@ -11,6 +12,7 @@ export default function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/audit/:id" element={<AuditResults />} />
         <Route path="/history" element={<History />} />
+        <Route path="/visibility" element={<Visibility />} />
       </Routes>
     </Layout>
   )
