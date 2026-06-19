@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import {
   Globe, FileText, Code, Gauge, Lock, Shield, Brain,
-  ArrowLeft, ExternalLink, Loader2
+  ArrowLeft, ExternalLink, Loader2, Cpu
 } from 'lucide-react'
 import { getAudit } from '../api'
 import ScoreCircle from '../components/ScoreCircle'
@@ -144,6 +144,37 @@ export default function AuditResults() {
           Site type: <span className="font-medium capitalize">{audit.site_type}</span>
         </span>
       </div>
+
+      {/* LLM Token Usage */}
+      {audit.token_usage && (
+        <div className="flex items-center space-x-4 mb-6 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg border border-purple-200 p-4">
+          <Cpu className="h-5 w-5 text-purple-600 flex-shrink-0" />
+          <div className="flex items-center space-x-6 text-sm">
+            <span className="font-medium text-purple-800">
+              {audit.token_usage.provider === 'groq' ? '⚡ Groq' : '🧠 Claude'} Token Usage
+            </span>
+            <div className="flex items-center space-x-4">
+              <span className="text-purple-700">
+                <span className="text-gray-500">Input:</span>{' '}
+                <span className="font-semibold">{audit.token_usage.input_tokens.toLocaleString()}</span>
+              </span>
+              <span className="text-purple-700">
+                <span className="text-gray-500">Output:</span>{' '}
+                <span className="font-semibold">{audit.token_usage.output_tokens.toLocaleString()}</span>
+              </span>
+              <span className="text-purple-700">
+                <span className="text-gray-500">Total:</span>{' '}
+                <span className="font-bold">{audit.token_usage.total_tokens.toLocaleString()}</span>
+              </span>
+            </div>
+          </div>
+          {audit.token_usage.model && (
+            <span className="ml-auto text-xs text-purple-500 font-mono">
+              {audit.token_usage.model}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="border-b border-gray-200 mb-6">
