@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard'
 import AuditResults from './pages/AuditResults'
 import History from './pages/History'
 import Visibility from './pages/Visibility'
+import CompetitiveAnalysis from './pages/CompetitiveAnalysis'
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
         <Route path="/audit/:id" element={<AuditResults />} />
         <Route path="/history" element={<History />} />
         <Route path="/visibility" element={<Visibility />} />
+        <Route path="/competitive" element={<CompetitiveAnalysis />} />
       </Routes>
     </Layout>
   )

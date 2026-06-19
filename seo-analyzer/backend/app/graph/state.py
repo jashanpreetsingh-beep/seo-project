@@ -47,6 +47,9 @@ class SEOState(TypedDict):
     issues: List[dict]
     recommendations: List[dict]
 
+    # ─── Token Usage (populated by llm_recommendations node) ──────────────────
+    token_usage: Optional[dict]  # {input_tokens, output_tokens, total_tokens, model}
+
     # ─── GEO Agent Results (5 analysis agents) ────────────────────────────────
     geo_entity_result: Optional[dict]       # Entity Understanding Agent
     geo_answer_result: Optional[dict]       # Answer Extraction Agent
