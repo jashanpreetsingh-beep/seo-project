@@ -33,6 +33,14 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str = ""
     GROQ_MODEL: str = "llama-3.3-70b-versatile"
 
+    # Groq API (alternative LLM provider)
+    LLM_PROVIDER: str = "anthropic"  # "anthropic" or "groq"
+    GROQ_API_KEY: str = ""
+    GROQ_MODEL: str = "llama-3.3-70b-versatile"
+
+    # Vector Store (ChromaDB)
+    CHROMA_PERSIST_DIR: str = "./chroma_db"  # Directory to persist ChromaDB data
+
     # CORS
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:3000"]
 

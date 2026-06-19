@@ -66,4 +66,14 @@ export async function checkVisibility({ query, target_url, provider, num_results
   return response.data
 }
 
+/**
+ * Run competitive content gap analysis.
+ * @param {object} params - { query, my_url, competitor_urls, n_results }
+ * @returns {Promise<object>} Gap analysis results
+ */
+export async function runCompetitiveGap({ query, my_url, competitor_urls, n_results = 10 }) {
+  const response = await api.post('/competitive/gap', { query, my_url, competitor_urls, n_results })
+  return response.data
+}
+
 export default api

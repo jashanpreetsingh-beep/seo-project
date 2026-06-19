@@ -50,6 +50,7 @@ from app.graph.nodes import (
     scorer_node,
 )
 from app.graph.nodes.llm_recommendations import llm_recommendations_node
+from app.graph.nodes.store_content import store_content_node
 from app.graph.nodes.geo import (
     entity_understanding_node,
     answer_extraction_node,
@@ -128,6 +129,7 @@ def create_seo_graph() -> StateGraph:
 
     # ─── Add LLM enhancement node ────────────────────────────────────────────
     graph.add_node("llm_recommendations", llm_recommendations_node)
+    graph.add_node("store_content", store_content_node)
 
     # ─── Define edges (the flow) ──────────────────────────────────────────────
 
@@ -158,23 +160,23 @@ def create_seo_graph() -> StateGraph:
     graph.add_edge("performance_analyzer", "security_analyzer")
     graph.add_edge("security_analyzer", "scorer")
 
-    # SEO scorer → GEO analysis chain
+    # scorer → GEO analysis chain
     graph.add_edge("scorer", "geo_entity")
-
-    # GEO Analysis chain (5 agents in sequence)
     graph.add_edge("geo_entity", "geo_answer")
     graph.add_edge("geo_answer", "geo_authority")
     graph.add_edge("geo_authority", "geo_citation")
     graph.add_edge("geo_citation", "geo_conversational")
-
-    # GEO agents → GEO scoring pipeline
     graph.add_edge("geo_conversational", "geo_scorer")
     graph.add_edge("geo_scorer", "geo_improvement")
     graph.add_edge("geo_improvement", "geo_report")
 
-    # GEO report → LLM enhancement → END
+    # GEO report → LLM recommendations → store_content → END
+    # The LLM node enhances recommendations with AI intelligence.
+    # If no API key is set, it returns empty and rule-based recs are used.
+    # The store_content node saves page content to ChromaDB for semantic search.
     graph.add_edge("geo_report", "llm_recommendations")
-    graph.add_edge("llm_recommendations", END)
+    graph.add_edge("llm_recommendations", "store_content")
+    graph.add_edge("store_content", END)
 
     return graph
 
