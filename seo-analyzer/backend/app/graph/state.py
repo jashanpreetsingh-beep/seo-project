@@ -19,6 +19,8 @@ class SEOState(TypedDict):
     1. `fetch` node populates: url, html, status_code, headers, redirect_chain
     2. Analyzer nodes read html/headers and write their results
     3. `scorer` node reads all results and computes health_score
+    4. GEO agents analyze AI visibility signals
+    5. GEO scorer/improvement/report nodes compile the GEO strategy
     """
 
     # ─── Input ────────────────────────────────────────────────────────────────
@@ -31,7 +33,7 @@ class SEOState(TypedDict):
     redirect_chain: List[dict]  # List of redirects encountered
     fetch_error: Optional[str]  # Error message if fetch failed
 
-    # ─── Analysis Results (populated by each analyzer node) ───────────────────
+    # ─── SEO Analysis Results (populated by each analyzer node) ───────────────
     technical_result: Optional[dict]
     content_result: Optional[dict]
     onpage_result: Optional[dict]
@@ -39,7 +41,7 @@ class SEOState(TypedDict):
     performance_result: Optional[dict]
     security_result: Optional[dict]
 
-    # ─── Final Output (populated by scorer node) ──────────────────────────────
+    # ─── SEO Final Output (populated by scorer node) ──────────────────────────
     health_score: float
     site_type: str
     issues: List[dict]
@@ -47,3 +49,22 @@ class SEOState(TypedDict):
 
     # ─── Token Usage (populated by llm_recommendations node) ──────────────────
     token_usage: Optional[dict]  # {input_tokens, output_tokens, total_tokens, model}
+
+    # ─── GEO Agent Results (5 analysis agents) ────────────────────────────────
+    geo_entity_result: Optional[dict]       # Entity Understanding Agent
+    geo_answer_result: Optional[dict]       # Answer Extraction Agent
+    geo_authority_result: Optional[dict]    # Authority & Trust Agent
+    geo_citation_result: Optional[dict]     # Citation Probability Agent
+    geo_conversational_result: Optional[dict]  # Conversational Search Agent
+
+    # ─── GEO Scoring & Strategy ───────────────────────────────────────────────
+    geo_score: float                        # Overall GEO score (0-100)
+    geo_scores: Optional[dict]              # Individual component scores
+    geo_visibility: Optional[dict]          # AI visibility level
+    geo_strengths: Optional[List[dict]]     # Strong areas
+    geo_weaknesses: Optional[List[dict]]    # Weak areas
+    geo_all_issues: Optional[List[dict]]    # All GEO issues aggregated
+    geo_priority_actions: Optional[List[dict]]  # Prioritized improvements
+    geo_potential_score: float              # Score after improvements
+    geo_total_potential_gain: float         # Total possible gain
+    geo_report: Optional[dict]             # Final compiled GEO report

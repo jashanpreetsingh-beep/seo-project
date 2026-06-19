@@ -6,13 +6,14 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import {
-  Globe, FileText, Code, Gauge, Lock, Shield,
+  Globe, FileText, Code, Gauge, Lock, Shield, Brain,
   ArrowLeft, ExternalLink, Loader2, Cpu
 } from 'lucide-react'
 import { getAudit } from '../api'
 import ScoreCircle from '../components/ScoreCircle'
 import CategoryCard from '../components/CategoryCard'
 import IssueCard from '../components/IssueCard'
+import GeoResults from './GeoResults'
 
 export default function AuditResults() {
   const { id } = useParams()
@@ -59,10 +60,12 @@ export default function AuditResults() {
     { key: 'schema', title: 'Schema Markup', icon: Code, score: audit.schema_markup?.score || 0 },
     { key: 'performance', title: 'Performance', icon: Gauge, score: audit.performance?.score || 0 },
     { key: 'security', title: 'Security', icon: Lock, score: audit.security?.score || 0 },
+    { key: 'geo', title: 'GEO (AI Visibility)', icon: Brain, score: audit.geo?.geo_score || audit.geo_score || 0 },
   ]
 
   const tabs = [
     { id: 'overview', label: 'Overview' },
+    { id: 'geo', label: `GEO Score (${Math.round(audit.geo?.geo_score || audit.geo_score || 0)})` },
     { id: 'issues', label: `Issues (${audit.issues?.length || 0})` },
     { id: 'recommendations', label: 'Action Plan' },
   ]
@@ -95,9 +98,10 @@ export default function AuditResults() {
 
       {/* Score + Categories Row */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-        {/* Big score circle */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-center">
-          <ScoreCircle score={audit.health_score} size={140} />
+        {/* Score circles - SEO and GEO */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-center space-x-6">
+          <ScoreCircle score={audit.health_score} size={120} label="SEO Score" />
+          <ScoreCircle score={audit.geo?.geo_score || audit.geo_score || 0} size={120} label="GEO Score" />
         </div>
 
         {/* Category cards */}
@@ -271,6 +275,10 @@ export default function AuditResults() {
             </div>
           )}
         </div>
+      )}
+
+      {activeTab === 'geo' && (
+        <GeoResults audit={audit} />
       )}
 
       {activeTab === 'issues' && (

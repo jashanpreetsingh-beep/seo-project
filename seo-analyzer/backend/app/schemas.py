@@ -116,6 +116,62 @@ class SecurityResult(BaseModel):
     issues: list[SEOIssue] = []
 
 
+# ─── GEO Result Schemas ───────────────────────────────────────────────────────
+
+class GEOCategoryScore(BaseModel):
+    """Score for a single GEO analysis category."""
+    score: float = 0
+    weight: str = ""
+    label: str = ""
+    detail: dict = {}
+
+
+class GEOVisibility(BaseModel):
+    """AI visibility level classification."""
+    level: str = "Poor"
+    description: str = ""
+    threshold: float = 0
+
+
+class GEOPriorityAction(BaseModel):
+    """A single prioritized GEO improvement action."""
+    priority: int = 0
+    issue: str = ""
+    solution: str = ""
+    impact: str = ""
+    estimated_score_gain: str = ""
+    effort: str = ""
+    category: str = ""
+
+
+class GEOMonthPlan(BaseModel):
+    """A single month in the 90-day plan."""
+    title: str = ""
+    focus: str = ""
+    tasks: list[str] = []
+    expected_gain: float = 0
+
+
+class GEO90DayPlan(BaseModel):
+    """90-day GEO improvement roadmap."""
+    month_1: GEOMonthPlan = GEOMonthPlan()
+    month_2: GEOMonthPlan = GEOMonthPlan()
+    month_3: GEOMonthPlan = GEOMonthPlan()
+
+
+class GEOResult(BaseModel):
+    """Complete GEO analysis result."""
+    geo_score: float = 0
+    visibility: dict = {}
+    scores: dict = {}  # Category scores
+    strengths: list[dict] = []
+    weaknesses: list[dict] = []
+    priority_actions: list[dict] = []
+    potential_score: float = 0
+    total_potential_gain: float = 0
+    plan_90_day: dict = {}
+
+
 # ─── Full Audit Response ──────────────────────────────────────────────────────
 
 class TokenUsage(BaseModel):
@@ -146,6 +202,10 @@ class AuditResponse(BaseModel):
     performance: PerformanceResult = PerformanceResult()
     security: SecurityResult = SecurityResult()
 
+    # GEO (Generative Engine Optimization) results
+    geo: GEOResult = GEOResult()
+    geo_score: float = 0
+
     # Aggregated issues
     issues: list[SEOIssue] = []
     critical_count: int = 0
@@ -165,6 +225,7 @@ class AuditHistoryItem(BaseModel):
     id: int
     url: str
     health_score: float
+    geo_score: float = 0
     site_type: Optional[str] = None
     created_at: datetime
     critical_count: int = 0

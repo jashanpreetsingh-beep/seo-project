@@ -18,7 +18,7 @@ export default function Layout({ children }) {
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center space-x-2">
               <BarChart3 className="h-8 w-8 text-gold" />
-              <span className="text-xl font-bold">SEO Analyzer</span>
+              <span className="text-xl font-bold">SEO + GEO Analyzer</span>
             </Link>
             <nav className="flex space-x-4">
               {navItems.map(({ path, label, icon: Icon }) => (
